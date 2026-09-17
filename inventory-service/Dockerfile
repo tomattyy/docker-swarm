@@ -12,6 +12,11 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 
+COPY --from=builder /app/node_modules ./node_modules
+COPY package*.json ./
+COPY index.js ./
+COPY src ./src
+
 EXPOSE 3001
 
 USER node 
