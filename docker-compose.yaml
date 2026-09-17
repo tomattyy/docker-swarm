@@ -1,0 +1,142 @@
+version: "3.8"
+
+services:
+  
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB:        ${POSTGRES_DB}
+      POSTGRES_USER:      ${POSTGRES_USER}
+      POSTGRES_PASSWORD:  ${POSTGRES_PASSWORD}
+    
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+    networks:
+      - aponti-net
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+    deploy:
+      resources:
+        limits: {
+          cpus: "0.50",
+          memory: 512M
+        }
+
+  product-service:
+    build: ./product-service
+    image: aponti/product-service:1.0
+    environment:
+      PORT:         "3001"
+      DB_HOST:      db
+      DB_PORT:      "5432"
+      DB_NAME:      ${POSTGRES_DB}
+      DB_USER:      ${POSTGRES_USER}
+      DB_PASSWORD:  ${POSTGRES_PASSWORD}
+
+    depends_on:
+      db: { 
+        condition: service_healty 
+      }
+
+    networks:
+      - aponti-net
+
+    deploy:
+      resources:
+        limits: {
+          cpus: "0.25",
+          memory: 128M
+        }
+    
+  inventory-service:
+    build: ./inventory-service
+    image: aponti/inventory-service:1.0
+    environment:
+      PORT:         "3002"
+      DB_HOST:      db
+      DB_PORT:      "5432"
+      DB_NAME:      ${POSTGRES_DB}
+      DB_USER:      ${POSTGRES_USER}
+      DB_PASSWORD:  ${POSTGRES_PASSWORD}
+
+    depends_on:
+      db: {
+        condition: service_healty
+      }
+    
+    networks:
+      - aponti-net
+
+    deploy:
+      resources:
+        limits: {
+          cpus: "0.25",
+          memory: 128M
+        }
+
+  order-service:
+    build: ./order-service
+    image: aponti/order-service:1.0
+    environment:
+      PORT:         "3003"
+      DB_HOST:      db
+      DB_PORT:      "5432"
+      DB_NAME:      ${POSTGRES_DB}
+      DB_USER:      ${POSTGRES_USER}
+      DB_PASSWORD:  ${POSTGRES_PASSWORD}
+
+    depends_on:
+      db: {
+        condition: service_healty
+      }
+    
+    networks:
+      - aponti-net
+    
+    deploy:
+      resources:
+        limits: {
+          cpus: "0.25",
+          memory: 128M
+        }
+
+  api-gateway:
+    build: ./api-gateway
+    image: aponti/api-gateway:1.0
+    environment:
+      PORT:         "3000"
+      PRODUCT_URL: http://product-service:3001
+      INVENTORY_URL: http://inventory-service:3002
+      ORDER_URL: http://order-service:3003
+
+    ports:
+      - "${GATEWAY_PORT}:3000"
+
+    depends_on:
+      - product-service
+      - inventory-service
+      - order-service
+
+    networks:
+      - aponti-net
+
+    deploy:
+      resources:
+        limits: {
+          cpus: "0.50",
+          memory: 256M
+        }
+
+networks:
+  aponti-net:
+    driver: bridge
+
+volumes:
+  db-data:
+
