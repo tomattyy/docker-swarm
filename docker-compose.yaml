@@ -41,7 +41,7 @@ services:
 
     depends_on:
       db: { 
-        condition: service_healty 
+        condition: service_healthy 
       }
 
     networks:
@@ -67,7 +67,7 @@ services:
 
     depends_on:
       db: {
-        condition: service_healty
+        condition: service_healthy
       }
     
     networks:
@@ -93,7 +93,7 @@ services:
 
     depends_on:
       db: {
-        condition: service_healty
+        condition: service_healthy
       }
     
     networks:
