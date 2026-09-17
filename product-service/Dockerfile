@@ -12,12 +12,12 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 
-EXPOSE 3003
-
 COPY --from=builder /app/node_modules ./node_modules
 COPY package*.json ./
 COPY index.js ./
 COPY src ./src
+
+EXPOSE 3003
 
 USER node 
 
