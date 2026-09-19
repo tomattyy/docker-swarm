@@ -95,3 +95,37 @@ services:
           cpus: "0.25",
           memory: 128M
         }
+
+  order-service:
+    image: aponti/order-service:1.0
+    environment:
+      PORT: "3003"
+      DB_HOST: db
+      DB_PORT: "5432"
+      DB_NAME: ${POSTGRES_DB}
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD_FILE: /run/secrets/db_password
+
+    networks:
+      - aponti-overlay
+
+    secrets:
+      - db_password
+
+    deploy:
+      replicas: 3
+
+      restart_policy: {
+        condition: on-failure
+      }
+
+      update_config:
+        order: start-first
+        parallelism: 1
+        delay: 10s
+
+      resources: 
+        limits: {
+          cpus: "0.25",
+          memory: 128M
+        }
