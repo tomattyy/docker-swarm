@@ -90,7 +90,8 @@ services:
         parallelism: 1
         delay: 10s
 
-      resources: {
-        cpus: "0.25",
-        memory: 128M
-      }
+      resources: 
+        limits: {
+          cpus: "0.25",
+          memory: 128M
+        }
