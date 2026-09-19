@@ -51,7 +51,7 @@ services:
         condition: on-failure
       }
 
-      update_policy:
+      update_config:
         order: start-first
         parallelism: 1
         delay: 10s
@@ -61,3 +61,36 @@ services:
           cpus: "0.25",
           memory: 128M
         }
+
+  inventory-service:
+    image: aponti/inventory-service:1.0
+    environment:
+      PORT: "3002"
+      DB_HOST: db
+      DB_PORT: "5432"
+      DB_NAME: ${POSTGRES_DB}
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD_FILE: /run/secrets/db_password
+    
+    networks:
+      - aponti-overlay
+
+    secrets:
+      - db_password
+
+    deploy:
+      replicas: 3
+
+      restart_policy: {
+        condition: on-failure
+      }
+
+      update_config:
+        order: start-first
+        parallelism: 1
+        delay: 10s
+
+      resources: {
+        cpus: "0.25",
+        memory: 128M
+      }
