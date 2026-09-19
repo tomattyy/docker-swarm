@@ -10,7 +10,11 @@ FROM node:18-alpine AS runtime
 
 WORKDIR /app 
 
-ENV NODE_ENV=production
+ENV NODE_ENV=production \
+    PORT=3000 \
+    PRODUCT_SERVICE_URL="" \
+    INVENTORY_SERVICE_URL="" \
+    ORDER_SERVICE_URL=""
 
 COPY --from=builder /app/node_modules ./node_modules
 COPY package*.json ./
